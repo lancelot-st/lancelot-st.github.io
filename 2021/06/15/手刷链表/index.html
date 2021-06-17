@@ -19,7 +19,7 @@
 <meta property="og:image" content="https://labuladong.gitee.io/algo/images/kgroup/8.gif">
 <meta property="og:image" content="https://labuladong.gitee.io/algo/images/%e5%9b%9e%e6%96%87%e9%93%be%e8%a1%a8/1.jpg">
 <meta property="article:published_time" content="2021-06-15T07:14:57.000Z">
-<meta property="article:modified_time" content="2021-06-17T13:36:24.633Z">
+<meta property="article:modified_time" content="2021-06-17T14:23:46.137Z">
 <meta property="article:author" content="富水难收">
 <meta property="article:tag" content="算法">
 <meta property="article:tag" content="反转链表">
@@ -49,6 +49,8 @@
     <canvas id="anm-canvas" class="anm-canvas"></canvas>
     <div class="left-col" q-class="show:isShow">
       
+
+
 <div class="overlay" style="background: #4d4d4d"></div>
 <div class="intrude-less">
 	<header id="header" class="inner">
@@ -197,6 +199,8 @@
 <p><img src="https://labuladong.gitee.io/algo/images/%E5%8F%8D%E8%BD%AC%E9%93%BE%E8%A1%A8/6.jpg" alt="图片转自labuladong"></p>
 <p>然后通过遍历到第一数字的结点保存下来作为反转后链表的前驱，我原来的方式有个巨大Bug 就是只能反转在中间部分的链表然后返回头结点。</p>
 <hr>
+<span id="more"></span>
+
 <h3 id="反转k个为一组的链表"><a href="#反转k个为一组的链表" class="headerlink" title="反转k个为一组的链表"></a>反转k个为一组的链表</h3><p>反转与结点b之前的所有链表结点</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">ListNode* reverseK(ListNode* head,ListNode* b)</span><br><span class="line">    &#123;</span><br><span class="line">        ListNode* pre = nullptr;</span><br><span class="line">        ListNode* cur = head;</span><br><span class="line">        ListNode* nxt = head;</span><br><span class="line">        <span class="keyword">while</span>(cur != b)//遍历到与b结点相同</span><br><span class="line">        &#123;</span><br><span class="line">            nxt = cur-&gt;next;</span><br><span class="line">            cur-&gt;next = pre;</span><br><span class="line">            pre = cur;</span><br><span class="line">            cur = nxt;//除了第一个结点其他结点指向前一个结点第一个指向空</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in">return</span> pre;//返回前驱</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
 <p><img src="https://labuladong.gitee.io/algo/images/kgroup/8.gif" alt="图片转自labuladong"></p>
@@ -334,6 +338,15 @@
 
   
 <nav id="article-nav">
+  
+    <a href="/2021/06/17/%E9%A6%96%E9%A1%B5/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          首页
+        
+      </div>
+    </a>
   
   
     <a href="/2021/06/13/%E6%88%91%E7%9A%84%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2/" id="article-nav-older" class="article-nav-link-wrap">
