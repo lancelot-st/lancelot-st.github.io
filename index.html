@@ -156,6 +156,209 @@
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-BBS论坛登录模块" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2022/08/06/BBS%E8%AE%BA%E5%9D%9B%E7%99%BB%E5%BD%95%E6%A8%A1%E5%9D%97/">BBS论坛登录模块分析</a>
+    </h1>
+  
+
+        
+        <a href="/2022/08/06/BBS%E8%AE%BA%E5%9D%9B%E7%99%BB%E5%BD%95%E6%A8%A1%E5%9D%97/" class="archive-article-date">
+  	<time datetime="2022-08-06T07:44:13.109Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-08-06</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<h2 id="登录模块"><a href="#登录模块" class="headerlink" title="登录模块"></a>登录模块</h2></blockquote>
+<ul>
+<li>在数据库中查询该用户是否存在</li>
+<li>进行用户密码的验证</li>
+<li>登录handler<blockquote>
+<h3 id="查询用户"><a href="#查询用户" class="headerlink" title="查询用户"></a>查询用户</h3></blockquote>
+</li>
+<li>通过gorm进行数据库的查询操作<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">func (u *userRepository) SelectUser(userName string) (*model.User, error) &#123;</span><br><span class="line">	User := new(model.User)</span><br><span class="line">	<span class="keyword">if</span> userName == <span class="string">&quot;&quot;</span> &#123;</span><br><span class="line">		<span class="built_in">return</span> &amp;model.User&#123;&#125;, errors.New(<span class="string">&quot;用户名不能为空&quot;</span>)</span><br><span class="line">	&#125;</span><br><span class="line">	model.DB().Where(<span class="string">&quot;username=?&quot;</span>, userName).Table(<span class="string">&quot;user&quot;</span>).Find(&amp;User)</span><br><span class="line">	<span class="built_in">return</span> User, nil</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func (u *userRepository) IsExistUser(userName string) error &#123;</span><br><span class="line">	user, err := u.SelectUser(userName)</span><br><span class="line">	<span class="keyword">if</span> user != nil &amp;&amp; err == nil &#123;</span><br><span class="line">		<span class="built_in">return</span> errors.New(<span class="string">&quot;该用户名已存在&quot;</span>)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="built_in">return</span> nil</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<h3 id="用户校验"><a href="#用户校验" class="headerlink" title="用户校验"></a>用户校验</h3></blockquote>
+</li>
+<li>对从数据库查询到的数据进行比对校验<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">func (u *userService) IsPwdSuccess(userName string, Pwd string) bool &#123;</span><br><span class="line">	user, err := repositories.UserRepository.SelectUser(userName)</span><br><span class="line">	<span class="keyword">if</span> err != nil &#123;</span><br><span class="line">		log.Println(<span class="string">&quot;用户名错误，没有该用户&quot;</span>)</span><br><span class="line">		<span class="built_in">return</span> <span class="literal">false</span></span><br><span class="line">	&#125;</span><br><span class="line">	//解密</span><br><span class="line">	<span class="built_in">pwd</span>, err := encrypt.Decrypt(user.Password, encrypt.Key)</span><br><span class="line">	<span class="keyword">if</span> err != nil &#123;</span><br><span class="line">		log.Fatal(<span class="string">&quot;解密失败&quot;</span>)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> <span class="built_in">pwd</span> != Pwd &#123;</span><br><span class="line">		log.Fatal(<span class="string">&quot;用户密码不对&quot;</span>)</span><br><span class="line">		<span class="built_in">return</span> <span class="literal">false</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="built_in">return</span> <span class="literal">true</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure></li>
+</ul>
+<blockquote>
+<h3 id="登录handler"><a href="#登录handler" class="headerlink" title="登录handler"></a>登录handler</h3></blockquote>
+<ul>
+<li>从表单获取用户登录所使用的信息，进行验证，验证成功，生成token<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">func (L *LoginController) Post(ctx iris.Context) &#123;</span><br><span class="line">	//获取post的表单值</span><br><span class="line">	userName := ctx.FormValue(<span class="string">&quot;Name&quot;</span>)</span><br><span class="line">	<span class="keyword">if</span> len(userName) == 0 &#123;</span><br><span class="line">		log.Println(<span class="string">&quot;用户名为空&quot;</span>)</span><br><span class="line">		ctx.JSON(<span class="string">&quot;用户名不能为空&quot;</span>)</span><br><span class="line"></span><br><span class="line">	&#125;</span><br><span class="line">	userPwd := ctx.FormValue(<span class="string">&quot;Password&quot;</span>)</span><br><span class="line">	<span class="keyword">if</span> len(userPwd) == 0 &#123;</span><br><span class="line">		log.Println(<span class="string">&quot;密码为空&quot;</span>)</span><br><span class="line">		ctx.JSON(<span class="string">&quot;用户密码不能为空&quot;</span>)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	//第一次登录校验用户名和密码是否正确</span><br><span class="line">	isOK := services.UserService.IsPwdSuccess(userName, userPwd)</span><br><span class="line">	<span class="keyword">if</span> !isOK &#123;</span><br><span class="line">		ctx.JSON(<span class="string">&quot;登录失败&quot;</span>)</span><br><span class="line">		<span class="built_in">return</span></span><br><span class="line">	&#125;</span><br><span class="line">	//从用户名获取完整的用用户信息</span><br><span class="line">	User, err := services.UserService.GetUserByName(userName)</span><br><span class="line">	<span class="keyword">if</span> err != nil || User == nil &#123;</span><br><span class="line">		ctx.JSON(<span class="string">&quot;不存在该用户&quot;</span>)</span><br><span class="line">	&#125;</span><br><span class="line">	//生成token</span><br><span class="line">	token, err := jwt.GenToken(User.UserID, User.Username)</span><br><span class="line">	<span class="keyword">if</span> err != nil &#123;</span><br><span class="line">		ctx.JSON(<span class="string">&quot;token创建失败&quot;</span>)</span><br><span class="line">	&#125;</span><br><span class="line">	//返回tokenString</span><br><span class="line"></span><br><span class="line">	ctx.JSON(token)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">BBS项目</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">登录模块</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2022/08/06/BBS%E8%AE%BA%E5%9D%9B%E7%99%BB%E5%BD%95%E6%A8%A1%E5%9D%97/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-BBS论坛注册模块" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2022/08/06/BBS%E8%AE%BA%E5%9D%9B%E6%B3%A8%E5%86%8C%E6%A8%A1%E5%9D%97/">BBS论坛注册模块分析</a>
+    </h1>
+  
+
+        
+        <a href="/2022/08/06/BBS%E8%AE%BA%E5%9D%9B%E6%B3%A8%E5%86%8C%E6%A8%A1%E5%9D%97/" class="archive-article-date">
+  	<time datetime="2022-08-06T07:03:43.650Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-08-06</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<h2 id="注册模块"><a href="#注册模块" class="headerlink" title="注册模块"></a>注册模块</h2></blockquote>
+<ul>
+<li>创建结构体、mysql建表</li>
+<li>创建用户</li>
+<li>用户注册handler</li>
+</ul>
+<hr>
+<blockquote>
+<h3 id="创建用户结构体"><a href="#创建用户结构体" class="headerlink" title="创建用户结构体"></a>创建用户结构体</h3></blockquote>
+<ul>
+<li>首先我们在项目的开始进行注册模块的开发，首先要进行用户的结构体创建。和mysql中相关用户表的建立。</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">type</span> User struct &#123;</span><br><span class="line">	UserID   int64  `gorm:<span class="string">&quot;unique;&quot;</span> json:<span class="string">&quot;user_id&quot;</span> form:<span class="string">&quot;Uuid&quot;</span> sql:<span class="string">&quot;user_id&quot;</span> `</span><br><span class="line">	Username string `gorm:<span class="string">&quot;size:32;unique;&quot;</span> json:<span class="string">&quot;username&quot;</span> form:<span class="string">&quot;Name&quot;</span> sql:<span class="string">&quot;username&quot;</span> validate:<span class="string">&quot;required&quot;</span> `</span><br><span class="line">	Password string `json:<span class="string">&quot;password&quot;</span> form:<span class="string">&quot;Password&quot;</span> sql:<span class="string">&quot;password&quot;</span> validate:<span class="string">&quot;required,max=16,min=6&quot;</span> `</span><br><span class="line">	Email    string `gorm:<span class="string">&quot;size:128&quot;</span> json:<span class="string">&quot;email&quot;</span> form:<span class="string">&quot;Email&quot;</span> sql:<span class="string">&quot;email&quot;</span> validate:<span class="string">&quot;required,email&quot;</span> `</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<ul>
+<li>用户表的创建<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">DROP TABLE IF EXISTS `user`;</span><br><span class="line">CREATE TABLE `user` (</span><br><span class="line">    `id` bigint(20) NOT NULL AUTO_INCREMENT,</span><br><span class="line">    `user_id` bigint(20) NOT NULL,</span><br><span class="line">    `username` varchar(64) COLLATE utf8mb4_general_ci NOT NULL,</span><br><span class="line">    `password` varchar(64) COLLATE utf8mb4_general_ci NOT NULL,</span><br><span class="line">    `email` varchar(64) COLLATE utf8mb4_general_ci,</span><br><span class="line">    `gender` tinyint(4) NOT NULL DEFAULT <span class="string">&#x27;0&#x27;</span>,</span><br><span class="line">    `create_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,</span><br><span class="line">    `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,</span><br><span class="line">    PRIMARY KEY (`id`),</span><br><span class="line">    UNIQUE KEY `idx_username` (`username`) USING BTREE,</span><br><span class="line">    UNIQUE KEY `idx_user_id` (`user_id`) USING BTREE</span><br><span class="line">) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<blockquote>
+<h3 id="创建用户"><a href="#创建用户" class="headerlink" title="创建用户"></a>创建用户</h3></blockquote>
+<ul>
+<li>用户的创建<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">func (u *userRepository) CreateUser(username string, userPwd string, Email string) (err error) &#123;</span><br><span class="line">	Db := model.DB()</span><br><span class="line">	uid := snowflake.GenID()//通过雪花算法生成用户ID</span><br><span class="line">	user := &amp;model.User&#123;</span><br><span class="line">		UserID:   uid,</span><br><span class="line">		Username: username,</span><br><span class="line">		Password: userPwd,</span><br><span class="line">		Email:    Email,</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> err := Db.Table(<span class="string">&quot;user&quot;</span>).Create(&amp;user).Error; err != nil &#123;</span><br><span class="line">		log.Fatalf(err.Error())</span><br><span class="line">		<span class="built_in">return</span> err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="built_in">return</span> nil</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li>用户创建对表单所提交的密码进行对称加密，并对加密后的密码储存到数据库中</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">func (u *userService) Register(userName string, userPwd string, Email string) bool &#123;</span><br><span class="line">	uPassword, errEncrypt := encrypt.Encrypt([]byte(userPwd), encrypt.Key)</span><br><span class="line">	<span class="keyword">if</span> errEncrypt != nil &#123;</span><br><span class="line">		log.Fatal(errEncrypt)</span><br><span class="line">		<span class="built_in">return</span> <span class="literal">false</span></span><br><span class="line">	&#125;</span><br><span class="line">	err := repositories.UserRepository.CreateUser(userName, uPassword, Email)</span><br><span class="line">	<span class="keyword">if</span> err != nil &#123;</span><br><span class="line">		<span class="built_in">return</span> <span class="literal">false</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="built_in">return</span> <span class="literal">true</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<h3 id="用户创建的handler"><a href="#用户创建的handler" class="headerlink" title="用户创建的handler"></a>用户创建的handler</h3></blockquote>
+<ul>
+<li>用户从前端的表单获取数据并存储到数据库中，完成用户的注册功能</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">func (r *RegisterController) Post(ctx iris.Context) &#123;</span><br><span class="line">	userName := ctx.PostValue(<span class="string">&quot;Name&quot;</span>)</span><br><span class="line">	userPwd := ctx.PostValue(<span class="string">&quot;Password&quot;</span>)</span><br><span class="line">	userEmail := ctx.PostValue(<span class="string">&quot;Email&quot;</span>)</span><br><span class="line"></span><br><span class="line">	// 判断err是不是 validator.ValidationErrors类型的errors</span><br><span class="line">	user := &amp;model.User&#123;</span><br><span class="line">		Username: userName,</span><br><span class="line">		Password: userPwd,</span><br><span class="line">		Email:    userEmail,</span><br><span class="line">	&#125;</span><br><span class="line">	isOK := services.UserService.Register(user.Username, user.Password, user.Email)</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> !isOK &#123;</span><br><span class="line">		ctx.JSON(<span class="string">&quot;注册失败&quot;</span>)</span><br><span class="line">		<span class="built_in">return</span></span><br><span class="line">	&#125;</span><br><span class="line">	ctx.JSON(<span class="string">&quot;注册成功&quot;</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">BBS项目</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">注册模块</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2022/08/06/BBS%E8%AE%BA%E5%9D%9B%E6%B3%A8%E5%86%8C%E6%A8%A1%E5%9D%97/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-“刷二叉树第一期”" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -561,7 +764,7 @@
   <div class="outer">
     <div id="footer-info">
     	<div class="footer-left">
-    		&copy; 2021 富水难收
+    		&copy; 2022 富水难收
     	</div>
       	<div class="footer-right">
       		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten
@@ -646,6 +849,18 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
             <input type="checkbox" q-on="click:toggleTag(e)" q-attr="checked:showTags">
           </label>
           <ul class="article-tag-list" q-show="showTags">
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">BBS项目</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">注册模块</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">登录模块</a>
+              </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">算法</a>

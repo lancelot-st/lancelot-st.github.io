@@ -6,16 +6,20 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://example.com">
-  <title>Archives: 2021 | MR.XZ</title>
+  <title>BBS论坛登录模块分析 | MR.XZ</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="一个正在学习希望一直学习下去的小菜鸡">
-<meta property="og:type" content="website">
-<meta property="og:title" content="MR.XZ">
-<meta property="og:url" content="http://example.com/archives/2021/index.html">
+  <meta name="description" content="登录模块  在数据库中查询该用户是否存在 进行用户密码的验证 登录handler 查询用户  通过gorm进行数据库的查询操作12345678910111213141516func (u *userRepository) SelectUser(userName string) (*model.User, error) &amp;#123;	User :&#x3D; new(model.User)	if userN">
+<meta property="og:type" content="article">
+<meta property="og:title" content="BBS论坛登录模块分析">
+<meta property="og:url" content="http://example.com/2022/08/06/BBS%E8%AE%BA%E5%9D%9B%E7%99%BB%E5%BD%95%E6%A8%A1%E5%9D%97/index.html">
 <meta property="og:site_name" content="MR.XZ">
-<meta property="og:description" content="一个正在学习希望一直学习下去的小菜鸡">
+<meta property="og:description" content="登录模块  在数据库中查询该用户是否存在 进行用户密码的验证 登录handler 查询用户  通过gorm进行数据库的查询操作12345678910111213141516func (u *userRepository) SelectUser(userName string) (*model.User, error) &amp;#123;	User :&#x3D; new(model.User)	if userN">
 <meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2022-08-06T07:44:13.109Z">
+<meta property="article:modified_time" content="2022-08-06T07:57:01.202Z">
 <meta property="article:author" content="富水难收">
+<meta property="article:tag" content="BBS项目">
+<meta property="article:tag" content="登录模块">
 <meta name="twitter:card" content="summary">
   
     <link rel="alternative" href="/atom.xml" title="MR.XZ" type="application/atom+xml">
@@ -154,172 +158,212 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-BBS论坛登录模块" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      BBS论坛登录模块分析
+    </h1>
+  
+
+        
+        <a href="/2022/08/06/BBS%E8%AE%BA%E5%9D%9B%E7%99%BB%E5%BD%95%E6%A8%A1%E5%9D%97/" class="archive-article-date">
+  	<time datetime="2022-08-06T07:44:13.109Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-08-06</time>
+</a>
+        
+      </header>
     
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<h2 id="登录模块"><a href="#登录模块" class="headerlink" title="登录模块"></a>登录模块</h2></blockquote>
+<ul>
+<li>在数据库中查询该用户是否存在</li>
+<li>进行用户密码的验证</li>
+<li>登录handler<blockquote>
+<h3 id="查询用户"><a href="#查询用户" class="headerlink" title="查询用户"></a>查询用户</h3></blockquote>
+</li>
+<li>通过gorm进行数据库的查询操作<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">func (u *userRepository) SelectUser(userName string) (*model.User, error) &#123;</span><br><span class="line">	User := new(model.User)</span><br><span class="line">	<span class="keyword">if</span> userName == <span class="string">&quot;&quot;</span> &#123;</span><br><span class="line">		<span class="built_in">return</span> &amp;model.User&#123;&#125;, errors.New(<span class="string">&quot;用户名不能为空&quot;</span>)</span><br><span class="line">	&#125;</span><br><span class="line">	model.DB().Where(<span class="string">&quot;username=?&quot;</span>, userName).Table(<span class="string">&quot;user&quot;</span>).Find(&amp;User)</span><br><span class="line">	<span class="built_in">return</span> User, nil</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func (u *userRepository) IsExistUser(userName string) error &#123;</span><br><span class="line">	user, err := u.SelectUser(userName)</span><br><span class="line">	<span class="keyword">if</span> user != nil &amp;&amp; err == nil &#123;</span><br><span class="line">		<span class="built_in">return</span> errors.New(<span class="string">&quot;该用户名已存在&quot;</span>)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="built_in">return</span> nil</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<h3 id="用户校验"><a href="#用户校验" class="headerlink" title="用户校验"></a>用户校验</h3></blockquote>
+</li>
+<li>对从数据库查询到的数据进行比对校验<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">func (u *userService) IsPwdSuccess(userName string, Pwd string) bool &#123;</span><br><span class="line">	user, err := repositories.UserRepository.SelectUser(userName)</span><br><span class="line">	<span class="keyword">if</span> err != nil &#123;</span><br><span class="line">		log.Println(<span class="string">&quot;用户名错误，没有该用户&quot;</span>)</span><br><span class="line">		<span class="built_in">return</span> <span class="literal">false</span></span><br><span class="line">	&#125;</span><br><span class="line">	//解密</span><br><span class="line">	<span class="built_in">pwd</span>, err := encrypt.Decrypt(user.Password, encrypt.Key)</span><br><span class="line">	<span class="keyword">if</span> err != nil &#123;</span><br><span class="line">		log.Fatal(<span class="string">&quot;解密失败&quot;</span>)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> <span class="built_in">pwd</span> != Pwd &#123;</span><br><span class="line">		log.Fatal(<span class="string">&quot;用户密码不对&quot;</span>)</span><br><span class="line">		<span class="built_in">return</span> <span class="literal">false</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="built_in">return</span> <span class="literal">true</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure></li>
+</ul>
+<blockquote>
+<h3 id="登录handler"><a href="#登录handler" class="headerlink" title="登录handler"></a>登录handler</h3></blockquote>
+<ul>
+<li>从表单获取用户登录所使用的信息，进行验证，验证成功，生成token<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">func (L *LoginController) Post(ctx iris.Context) &#123;</span><br><span class="line">	//获取post的表单值</span><br><span class="line">	userName := ctx.FormValue(<span class="string">&quot;Name&quot;</span>)</span><br><span class="line">	<span class="keyword">if</span> len(userName) == 0 &#123;</span><br><span class="line">		log.Println(<span class="string">&quot;用户名为空&quot;</span>)</span><br><span class="line">		ctx.JSON(<span class="string">&quot;用户名不能为空&quot;</span>)</span><br><span class="line"></span><br><span class="line">	&#125;</span><br><span class="line">	userPwd := ctx.FormValue(<span class="string">&quot;Password&quot;</span>)</span><br><span class="line">	<span class="keyword">if</span> len(userPwd) == 0 &#123;</span><br><span class="line">		log.Println(<span class="string">&quot;密码为空&quot;</span>)</span><br><span class="line">		ctx.JSON(<span class="string">&quot;用户密码不能为空&quot;</span>)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	//第一次登录校验用户名和密码是否正确</span><br><span class="line">	isOK := services.UserService.IsPwdSuccess(userName, userPwd)</span><br><span class="line">	<span class="keyword">if</span> !isOK &#123;</span><br><span class="line">		ctx.JSON(<span class="string">&quot;登录失败&quot;</span>)</span><br><span class="line">		<span class="built_in">return</span></span><br><span class="line">	&#125;</span><br><span class="line">	//从用户名获取完整的用用户信息</span><br><span class="line">	User, err := services.UserService.GetUserByName(userName)</span><br><span class="line">	<span class="keyword">if</span> err != nil || User == nil &#123;</span><br><span class="line">		ctx.JSON(<span class="string">&quot;不存在该用户&quot;</span>)</span><br><span class="line">	&#125;</span><br><span class="line">	//生成token</span><br><span class="line">	token, err := jwt.GenToken(User.UserID, User.Username)</span><br><span class="line">	<span class="keyword">if</span> err != nil &#123;</span><br><span class="line">		ctx.JSON(<span class="string">&quot;token创建失败&quot;</span>)</span><br><span class="line">	&#125;</span><br><span class="line">	//返回tokenString</span><br><span class="line"></span><br><span class="line">	ctx.JSON(token)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
+
+      
+
+      
+        <div class="page-reward">
+          <a href="javascript:;" class="page-reward-btn tooltip-top">
+            <div class="tooltip tooltip-east">
+            <span class="tooltip-item">
+              赏
+            </span>
+            <span class="tooltip-content">
+              <span class="tooltip-text">
+                <span class="tooltip-inner">
+                  <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢你请我吃糖果<i class="icon icon-quo-right"></i></p>
+                  <div class="reward-box">
+                    
+                    <div class="reward-box-item">
+                      <img class="reward-img" src="/assests/alipay.jpg">
+                      <span class="reward-type">支付宝</span>
+                    </div>
+                    
+                    
+                    <div class="reward-box-item">
+                      <img class="reward-img" src="/assests/weixin.png">
+                      <span class="reward-type">微信</span>
+                    </div>
+                    
+                  </div>
+                </span>
+              </span>
+            </span>
+          </div>
+          </a>
+        </div>
+      
+    </div>
+    <div class="article-info article-info-index">
       
       
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2021" class="archive-year">2021</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/06/18/%E2%80%9C%E5%88%B7%E4%BA%8C%E5%8F%89%E6%A0%91%E7%AC%AC%E4%B8%80%E6%9C%9F%E2%80%9D/" class="archive-article-date">
-  	<time datetime="2021-06-18T07:39:03.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-06-18</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2021/06/18/%E2%80%9C%E5%88%B7%E4%BA%8C%E5%8F%89%E6%A0%91%E7%AC%AC%E4%B8%80%E6%9C%9F%E2%80%9D/">刷二叉树第一期</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/06/17/%E9%A6%96%E9%A1%B5/" class="archive-article-date">
-  	<time datetime="2021-06-17T13:46:28.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-06-17</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2021/06/17/%E9%A6%96%E9%A1%B5/">首页</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/06/15/%E6%89%8B%E5%88%B7%E9%93%BE%E8%A1%A8/" class="archive-article-date">
-  	<time datetime="2021-06-15T07:14:57.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-06-15</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2021/06/15/%E6%89%8B%E5%88%B7%E9%93%BE%E8%A1%A8/">手刷链表</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">BBS项目</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">反转链表</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">登录模块</a>
         		</li>
       		
 		</ul>
 	</div>
 
-          
+      
 
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=http://example.com/2022/08/06/BBS%E8%AE%BA%E5%9D%9B%E7%99%BB%E5%BD%95%E6%A8%A1%E5%9D%97/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/06/13/%E6%88%91%E7%9A%84%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2/" class="archive-article-date">
-  	<time datetime="2021-06-13T09:30:42.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-06-13</time>
-</a>
+<nav id="article-nav">
+  
+  
+    <a href="/2022/08/06/BBS%E8%AE%BA%E5%9D%9B%E6%B3%A8%E5%86%8C%E6%A8%A1%E5%9D%97/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">BBS论坛注册模块分析</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
         </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2021/06/13/%E6%88%91%E7%9A%84%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2/">我的第一篇博客</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-          
-
+        
+        
+        <div class="toc-container tooltip-left">
+            <i class="icon-font icon-category"></i>
+            <div class="tooltip tooltip-east">
+                <span class="tooltip-item">
+                </span>
+                <span class="tooltip-content">
+                    <div class="toc-article">
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%99%BB%E5%BD%95%E6%A8%A1%E5%9D%97"><span class="toc-number">1.</span> <span class="toc-text">登录模块</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9F%A5%E8%AF%A2%E7%94%A8%E6%88%B7"><span class="toc-number">1.1.</span> <span class="toc-text">查询用户</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%94%A8%E6%88%B7%E6%A0%A1%E9%AA%8C"><span class="toc-number">1.2.</span> <span class="toc-text">用户校验</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%99%BB%E5%BD%95handler"><span class="toc-number">1.3.</span> <span class="toc-text">登录handler</span></a></li></ol></li></ol>
+                    </div>
+                </span>
+            </div>
         </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
+        
+    </div>
+</aside>
+
+
+
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/06/13/hello-world/" class="archive-article-date">
-  	<time datetime="2021-06-13T09:22:05.595Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-06-13</time>
-</a>
-        </div>
-    	 
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2021/06/13/hello-world/">Hello World</a>
-    </h1>
   
 
-        <div class="article-info info-on-right">
-          
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-  
-    </div></section>
   
 
-    
+  
+
+  
 
 
           </div>
@@ -345,8 +389,8 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: false,
