@@ -6,16 +6,19 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://example.com">
-  <title>Tag: 注册模块 | MR.XZ</title>
+  <title>mpRpc框架之RpcChannel | MR.XZ</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="一个正在学习希望一直学习下去的小菜鸡">
-<meta property="og:type" content="website">
-<meta property="og:title" content="MR.XZ">
-<meta property="og:url" content="http://example.com/tags/%E6%B3%A8%E5%86%8C%E6%A8%A1%E5%9D%97/index.html">
+  <meta name="description" content="MprpcChannel类  所有通过Stub代理对象调用的rpc方法都从这里处理，统一做方法的调用的数据序列化和网络发送，在这部分中主要只有一个方法就是CallMethod   参数名 意义  method  RPC的调用方法类似Login这种方法 controller  用于携带执行的状态信息 request 随网络发送过来的请求信息（参数等） response 响应信息，执行结果等 don">
+<meta property="og:type" content="article">
+<meta property="og:title" content="mpRpc框架之RpcChannel">
+<meta property="og:url" content="http://example.com/2022/08/08/mpRpc%E6%A1%86%E6%9E%B6%E4%B9%8BRpcChannel/index.html">
 <meta property="og:site_name" content="MR.XZ">
-<meta property="og:description" content="一个正在学习希望一直学习下去的小菜鸡">
+<meta property="og:description" content="MprpcChannel类  所有通过Stub代理对象调用的rpc方法都从这里处理，统一做方法的调用的数据序列化和网络发送，在这部分中主要只有一个方法就是CallMethod   参数名 意义  method  RPC的调用方法类似Login这种方法 controller  用于携带执行的状态信息 request 随网络发送过来的请求信息（参数等） response 响应信息，执行结果等 don">
 <meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2022-08-08T08:32:35.126Z">
+<meta property="article:modified_time" content="2022-08-08T09:04:27.071Z">
 <meta property="article:author" content="富水难收">
+<meta property="article:tag" content="mpRpc">
 <meta name="twitter:card" content="summary">
   
     <link rel="alternative" href="/atom.xml" title="MR.XZ" type="application/atom+xml">
@@ -154,64 +157,232 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-mpRpc框架之RpcChannel" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2022" class="archive-year">2022</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2022/08/06/BBS%E8%AE%BA%E5%9D%9B%E6%B3%A8%E5%86%8C%E6%A8%A1%E5%9D%97/" class="archive-article-date">
-  	<time datetime="2022-08-06T07:03:43.650Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-08-06</time>
-</a>
-        </div>
-    	 
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2022/08/06/BBS%E8%AE%BA%E5%9D%9B%E6%B3%A8%E5%86%8C%E6%A8%A1%E5%9D%97/">BBS论坛注册模块分析</a>
+    <h1 class="article-title" itemprop="name">
+      mpRpc框架之RpcChannel
     </h1>
   
 
-        <div class="article-info info-on-right">
-          
+        
+        <a href="/2022/08/08/mpRpc%E6%A1%86%E6%9E%B6%E4%B9%8BRpcChannel/" class="archive-article-date">
+  	<time datetime="2022-08-08T08:32:35.126Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-08-08</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<h2 id="MprpcChannel类"><a href="#MprpcChannel类" class="headerlink" title="MprpcChannel类"></a>MprpcChannel类</h2></blockquote>
+<ul>
+<li>所有通过Stub代理对象调用的rpc方法都从这里处理，统一做方法的调用的数据序列化和网络发送，在这部分中主要只有一个方法就是CallMethod</li>
+</ul>
+<blockquote>
+<h3 id="参数名-意义"><a href="#参数名-意义" class="headerlink" title="参数名 意义"></a>参数名 意义</h3></blockquote>
+<ul>
+<li>method  RPC的调用方法类似Login这种方法</li>
+<li>controller  用于携带执行的状态信息</li>
+<li>request 随网络发送过来的请求信息（参数等）</li>
+<li>response 响应信息，执行结果等</li>
+<li>done 回调函数</li>
+</ul>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MprpcChannel</span> :</span> <span class="keyword">public</span> google::protobuf::RpcChannel &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">  <span class="comment">// 所有通过stub代理对象调用的rpc方法，都在这里统一进行rpc方法调用的数据序列化和网络发送</span></span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">CallMethod</span><span class="params">(<span class="keyword">const</span> google::protobuf::MethodDescriptor *method,</span></span></span><br><span class="line"><span class="params"><span class="function">                  google::protobuf::RpcController *controller,</span></span></span><br><span class="line"><span class="params"><span class="function">                  <span class="keyword">const</span> google::protobuf::Message *request,</span></span></span><br><span class="line"><span class="params"><span class="function">                  google::protobuf::Message *response,</span></span></span><br><span class="line"><span class="params"><span class="function">                  google::protobuf::Closure *done)</span></span>;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<h2 id="CallMethod分析"><a href="#CallMethod分析" class="headerlink" title="CallMethod分析"></a>CallMethod分析</h2></blockquote>
+<ul>
+<li>在.proto文件中我们生命的service类型的数据中带有Login函数就是之后生成的UserServiceRpc中的一个函数，这个UserServiceRpc继承Service类</li>
+</ul>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">UserServiceRpc</span> :</span> <span class="keyword">public</span> ::google::protobuf::Service &#123;</span><br><span class="line"> <span class="keyword">protected</span>:</span><br><span class="line">  <span class="comment">// This class should be treated as an abstract interface.</span></span><br><span class="line">  <span class="function"><span class="keyword">inline</span> <span class="title">UserServiceRpc</span><span class="params">()</span> </span>&#123;&#125;;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="keyword">virtual</span> ~<span class="built_in">UserServiceRpc</span>();</span><br><span class="line"></span><br><span class="line">  <span class="keyword">typedef</span> UserServiceRpc_Stub Stub;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">static</span> <span class="keyword">const</span> ::google::<span class="function">protobuf::ServiceDescriptor* <span class="title">descriptor</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">Login</span><span class="params">(::google::protobuf::RpcController* controller,</span></span></span><br><span class="line"><span class="params"><span class="function">                       <span class="keyword">const</span> ::fixbug::LoginRequest* request,</span></span></span><br><span class="line"><span class="params"><span class="function">                       ::fixbug::LoginResponse* response,</span></span></span><br><span class="line"><span class="params"><span class="function">                       ::google::protobuf::Closure* done)</span></span>;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><p>在这里有个UserServiceRpc_Stub类继承自UserServiceRpc类，由Stub来统一进行调用</p>
+</li>
+<li><p>Login函数的实现</p>
+</li>
+</ul>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">UserServiceRpc_Stub::Login</span><span class="params">(::google::protobuf::RpcController* controller,</span></span></span><br><span class="line"><span class="params"><span class="function">                              <span class="keyword">const</span> ::fixbug::LoginRequest* request,</span></span></span><br><span class="line"><span class="params"><span class="function">                              ::fixbug::LoginResponse* response,</span></span></span><br><span class="line"><span class="params"><span class="function">                              ::google::protobuf::Closure* done)</span> </span>&#123;</span><br><span class="line">  channel_-&gt;<span class="built_in">CallMethod</span>(<span class="built_in">descriptor</span>()-&gt;<span class="built_in">method</span>(<span class="number">0</span>),</span><br><span class="line">                       controller, request, response, done);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>在上述的Login函数的实现上我们可以看到，器内部实际上调用的就是一个CallMethod方法，这个CallMethod是个虚函数，所以当我们在Rpc框架中调用的就是我们自己所重写的一个CalleMethod方法，在这个方法中我们会用到进行数据的传输在作为客户端进行方法的调用，在由作为服务端的RpcProvider进行Login函数的调用再将所得到的返回的数据进行封装成Response返回远端调用的客户端</li>
+</ul>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">MprpcChannel::CallMethod</span><span class="params">(<span class="keyword">const</span> google::protobuf::MethodDescriptor *method,</span></span></span><br><span class="line"><span class="params"><span class="function">                              google::protobuf::RpcController *controller,</span></span></span><br><span class="line"><span class="params"><span class="function">                              <span class="keyword">const</span> google::protobuf::Message *request,</span></span></span><br><span class="line"><span class="params"><span class="function">                              google::protobuf::Message *response,</span></span></span><br><span class="line"><span class="params"><span class="function">                              google::protobuf::Closure *done)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> google::protobuf::ServiceDescriptor *psd = method-&gt;<span class="built_in">service</span>();</span><br><span class="line">  std::string service_name = psd-&gt;<span class="built_in">name</span>();</span><br><span class="line">  std::string method_name = method-&gt;<span class="built_in">name</span>();</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 1.序列化参数agrs</span></span><br><span class="line">  std::string args_str;</span><br><span class="line">  <span class="keyword">if</span> (!request-&gt;<span class="built_in">SerializeToString</span>(&amp;args_str)) &#123;</span><br><span class="line">    controller-&gt;<span class="built_in">SetFailed</span>(<span class="string">&quot;serialize request error!&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">uint32_t</span> args_size = args_str.<span class="built_in">size</span>(); <span class="comment">// 获取参数的序列化字符串长度 args_size</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">// 定义rpc的请求header</span></span><br><span class="line">  mprpc::RpcHeader rpc_header;</span><br><span class="line">  rpc_header.<span class="built_in">set_service_name</span>(service_name);</span><br><span class="line">  rpc_header.<span class="built_in">set_method_name</span>(method_name);</span><br><span class="line">  rpc_header.<span class="built_in">set_args_size</span>(args_size);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 2.序列化rpc header</span></span><br><span class="line">  std::string rpc_header_str;</span><br><span class="line">  <span class="keyword">if</span> (!rpc_header.<span class="built_in">SerializeToString</span>(&amp;rpc_header_str)) &#123;</span><br><span class="line">    controller-&gt;<span class="built_in">SetFailed</span>(<span class="string">&quot;serialize rpc header error!&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">uint32_t</span> header_size = rpc_header_str.<span class="built_in">size</span>();</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 3.组织要发送的rpc请求的字符串</span></span><br><span class="line">  std::string send_buf;</span><br><span class="line">  send_buf.<span class="built_in">insert</span>(<span class="number">0</span>, (<span class="keyword">char</span> *)&amp;header_size, <span class="number">4</span>); <span class="comment">// header_size</span></span><br><span class="line">  send_buf += rpc_header_str;                  <span class="comment">// rpc_header</span></span><br><span class="line">  send_buf += args_str;                        <span class="comment">// args</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">// 打印调试信息</span></span><br><span class="line">  std::cout &lt;&lt; <span class="string">&quot;==============================================&quot;</span> &lt;&lt; std::endl;</span><br><span class="line">  std::cout &lt;&lt; <span class="string">&quot;header_size: &quot;</span> &lt;&lt; header_size &lt;&lt; std::endl;</span><br><span class="line">  std::cout &lt;&lt; <span class="string">&quot;rpc_header_str: &quot;</span> &lt;&lt; rpc_header_str &lt;&lt; std::endl;</span><br><span class="line">  std::cout &lt;&lt; <span class="string">&quot;service_name: &quot;</span> &lt;&lt; rpc_header.<span class="built_in">service_name</span>() &lt;&lt; std::endl;</span><br><span class="line">  std::cout &lt;&lt; <span class="string">&quot;method_name: &quot;</span> &lt;&lt; rpc_header.<span class="built_in">method_name</span>() &lt;&lt; std::endl;</span><br><span class="line">  std::cout &lt;&lt; <span class="string">&quot;args_size: &quot;</span> &lt;&lt; rpc_header.<span class="built_in">args_size</span>() &lt;&lt; std::endl;</span><br><span class="line">  std::cout &lt;&lt; <span class="string">&quot;args_str: &quot;</span> &lt;&lt; args_str &lt;&lt; std::endl;</span><br><span class="line">  std::cout &lt;&lt; <span class="string">&quot;==============================================&quot;</span> &lt;&lt; std::endl;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// ########################### 发起网络请求 #############################</span></span><br><span class="line">  <span class="comment">// 1.使用tcp编程，完成rpc方法的远程调用</span></span><br><span class="line">  <span class="keyword">int</span> clientfd = <span class="built_in">socket</span>(AF_INET, SOCK_STREAM, <span class="number">0</span>);</span><br><span class="line">  <span class="keyword">if</span> (clientfd == <span class="number">-1</span>) &#123;</span><br><span class="line">    <span class="comment">// perror(&quot;create socket error!&quot;);</span></span><br><span class="line">    controller-&gt;<span class="built_in">SetFailed</span>(<span class="string">&quot;create socket error!&quot;</span> + std::<span class="built_in">to_string</span>(errno));</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 获取配置</span></span><br><span class="line">  <span class="keyword">auto</span> config = MprpcApplication::<span class="built_in">GetInstance</span>().<span class="built_in">GetConfig</span>();</span><br><span class="line">  <span class="comment">// 加载ip和port</span></span><br><span class="line">  std::string ip = config.<span class="built_in">Load</span>(<span class="string">&quot;rpcserver_ip&quot;</span>);</span><br><span class="line">  <span class="keyword">uint16_t</span> port = <span class="built_in">atoi</span>(config.<span class="built_in">Load</span>(<span class="string">&quot;rpcserver_port&quot;</span>).<span class="built_in">c_str</span>());</span><br><span class="line">  <span class="comment">// <span class="doctag">TODO:</span> 这里为什么不用muduo</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">sockaddr_in</span> <span class="title">server_addr</span>;</span></span><br><span class="line">  server_addr.sin_family = AF_INET;</span><br><span class="line">  server_addr.sin_port = <span class="built_in">htons</span>(port);</span><br><span class="line">  server_addr.sin_addr.s_addr = <span class="built_in">inet_addr</span>(ip.<span class="built_in">c_str</span>());</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 2.连接rpc服务节点</span></span><br><span class="line">  <span class="keyword">if</span> (<span class="number">-1</span> ==</span><br><span class="line">      <span class="built_in">connect</span>(clientfd, (struct sockaddr *)&amp;server_addr, <span class="built_in"><span class="keyword">sizeof</span></span>(server_addr))) &#123;</span><br><span class="line">    <span class="comment">// perror(&quot;connect error!&quot;);</span></span><br><span class="line">    controller-&gt;<span class="built_in">SetFailed</span>(<span class="string">&quot;connect error!&quot;</span> + std::<span class="built_in">to_string</span>(errno));</span><br><span class="line">    <span class="built_in">close</span>(clientfd);</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 3.发送rpc请求</span></span><br><span class="line">  <span class="keyword">if</span> (<span class="number">-1</span> == <span class="built_in">send</span>(clientfd, send_buf.<span class="built_in">c_str</span>(), send_buf.<span class="built_in">size</span>(), <span class="number">0</span>)) &#123;</span><br><span class="line">    <span class="comment">// perror(&quot;send error!&quot;);</span></span><br><span class="line">    controller-&gt;<span class="built_in">SetFailed</span>(<span class="string">&quot;send error!&quot;</span> + std::<span class="built_in">to_string</span>(errno));</span><br><span class="line">    <span class="built_in">close</span>(clientfd);</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 4.接受rpc请求的响应值</span></span><br><span class="line">  <span class="keyword">char</span> recv_buf[<span class="number">1024</span>]&#123;&#125;;</span><br><span class="line">  <span class="keyword">int</span> recv_size&#123;&#125;;</span><br><span class="line">  <span class="keyword">if</span> (<span class="number">-1</span> == (recv_size = <span class="built_in">recv</span>(clientfd, recv_buf, <span class="number">1024</span>, <span class="number">0</span>))) &#123;</span><br><span class="line">    <span class="comment">// perror(&quot;receive error!&quot;);</span></span><br><span class="line">    controller-&gt;<span class="built_in">SetFailed</span>(<span class="string">&quot;receive error!&quot;</span> + std::<span class="built_in">to_string</span>(errno));</span><br><span class="line">    <span class="built_in">close</span>(clientfd);</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 5.反序列化rpc调用的响应数据</span></span><br><span class="line">  <span class="keyword">if</span> (!response-&gt;<span class="built_in">ParseFromArray</span>(recv_buf, recv_size)) &#123;</span><br><span class="line">    controller-&gt;<span class="built_in">SetFailed</span>(<span class="string">&quot;parse error! response_str: &quot;</span> +</span><br><span class="line">                          std::<span class="built_in">string</span>(recv_buf, recv_size));</span><br><span class="line">    <span class="built_in">close</span>(clientfd);</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="built_in">close</span>(clientfd);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+      
+
+      
+        <div class="page-reward">
+          <a href="javascript:;" class="page-reward-btn tooltip-top">
+            <div class="tooltip tooltip-east">
+            <span class="tooltip-item">
+              赏
+            </span>
+            <span class="tooltip-content">
+              <span class="tooltip-text">
+                <span class="tooltip-inner">
+                  <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢你请我吃糖果<i class="icon icon-quo-right"></i></p>
+                  <div class="reward-box">
+                    
+                    <div class="reward-box-item">
+                      <img class="reward-img" src="/assests/alipay.jpg">
+                      <span class="reward-type">支付宝</span>
+                    </div>
+                    
+                    
+                    <div class="reward-box-item">
+                      <img class="reward-img" src="/assests/weixin.png">
+                      <span class="reward-type">微信</span>
+                    </div>
+                    
+                  </div>
+                </span>
+              </span>
+            </span>
+          </div>
+          </a>
+        </div>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">BBS项目</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">注册模块</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">mpRpc</a>
         		</li>
       		
 		</ul>
 	</div>
 
-          
+      
 
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=http://example.com/2022/08/08/mpRpc%E6%A1%86%E6%9E%B6%E4%B9%8BRpcChannel/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
+  
+<nav id="article-nav">
+  
+    <a href="/2022/08/08/mpRpc%E6%A1%86%E6%9E%B6%E4%B9%8BRpcPrpvider/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          mpRpc框架之RpcProvider
+        
+      </div>
+    </a>
   
   
-    </div></section>
+    <a href="/2022/08/06/BBS%E8%AE%BA%E5%9D%9B%E7%99%BB%E5%BD%95%E6%A8%A1%E5%9D%97/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">BBS论坛登录模块分析</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+        <div class="toc-container tooltip-left">
+            <i class="icon-font icon-category"></i>
+            <div class="tooltip tooltip-east">
+                <span class="tooltip-item">
+                </span>
+                <span class="tooltip-content">
+                    <div class="toc-article">
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#MprpcChannel%E7%B1%BB"><span class="toc-number">1.</span> <span class="toc-text">MprpcChannel类</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%82%E6%95%B0%E5%90%8D-%E6%84%8F%E4%B9%89"><span class="toc-number">1.1.</span> <span class="toc-text">参数名 意义</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#CallMethod%E5%88%86%E6%9E%90"><span class="toc-number">2.</span> <span class="toc-text">CallMethod分析</span></a></li></ol>
+                    </div>
+                </span>
+            </div>
+        </div>
+        
+    </div>
+</aside>
+
+
+
+  
+  
   
 
-    
+  
+
+  
+
+  
 
 
           </div>
@@ -237,9 +408,9 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
+		isPost: true,
 		isArchive: false,
-		isTag: true,
+		isTag: false,
 		isCategory: false,
 		open_in_new: false,
 		toc_hide_index: true,
@@ -312,11 +483,7 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">注册模块</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">登录模块</a>
+                <a href="javascript:void(0)" class="js-tag color1">mpRpc</a>
               </li>
              
               <li class="article-tag-list-item">
